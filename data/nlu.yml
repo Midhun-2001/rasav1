@@ -1,0 +1,260 @@
+version: "3.1"
+
+nlu:
+- intent: greet
+  examples: |
+    - hey
+    - hello
+    - hi
+    - hello there
+    - good morning
+    - good evening
+    - moin
+    - hey there
+    - let's go
+    - hey dude
+    - goodmorning
+    - goodevening
+    - good afternoon
+
+- intent: goodbye
+  examples: |
+    - cu
+    - good by
+    - cee you later
+    - good night
+    - bye
+    - goodbye
+    - have a nice day
+    - see you around
+    - bye bye
+    - see you later
+
+- intent: affirm
+  examples: |
+    - yes
+    - y
+    - indeed
+    - of course
+    - that sounds good
+    - correct
+
+- intent: deny
+  examples: |
+    - no
+    - n
+    - never
+    - I don't think so
+    - don't like that
+    - no way
+    - not really
+
+- intent: mood_great
+  examples: |
+    - perfect
+    - great
+    - amazing
+    - feeling like a king
+    - wonderful
+    - I am feeling very good
+    - I am great
+    - I am amazing
+    - I am going to save the world
+    - super stoked
+    - extremely good
+    - so so perfect
+    - so good
+    - so perfect
+
+- intent: mood_unhappy
+  examples: |
+    - my day was horrible
+    - I am sad
+    - I don't feel very well
+    - I am disappointed
+    - super sad
+    - I'm so sad
+    - sad
+    - very sad
+    - unhappy
+    - not good
+    - not very good
+    - extremly sad
+    - so saad
+    - so sad
+
+- intent: bot_challenge
+  examples: |
+    - are you a bot?
+    - are you a human?
+    - am I talking to a bot?
+    - am I talking to a human?
+    
+- intent: size
+  examples: |
+    - What is the size of the campus?
+    - Size of the campus
+    - What is the size of the campus
+    
+- intent: courses
+  examples: |
+    - What are the courses offered by the department
+    - How many courses are offered by the department
+    - What are the courses offered by the department?
+    - What are the courses
+    - What are the courses there
+    - Which courses
+    - Which are the courses there
+    
+- intent: ds_year
+  examples: |
+    - When did MSc Data Science get started in the department  
+    - In which year did MSc Data Science get started in the department 
+    
+- intent: tm_year
+  examples: |
+    - When did MTech Technology Management get started in the department  
+    - In which year did MTech Technology Management get started in the department 
+        
+- intent: ds_seat
+  examples: |
+    - How many seats does MSc Data Science has
+    
+- intent: tm_seat
+  examples: |
+    - How many seats does MTech Technology Management has  
+    
+- intent: ds_fees
+  examples: |
+    - What is the fees for MSc Data Science      
+    - Fees for MSc Data Science
+    
+- intent: tm_fees
+  examples: |
+    - What is the fees for MTech Technology Management 
+    - Fees for MTech Technology Management 
+    
+- intent: mphil_fees
+  examples: |
+    - What is the fees for M.Phil Futures Studies
+    - Fees for M.Phil Futures Studies    
+    
+- intent: diploma_fees
+  examples: |
+    - What is the fees for PGDKM
+    - What is the fees for P.G.Diploma in Knowledge Management
+    - Fees for PGDKM  
+    
+- intent: duration_ds
+  examples: |
+    - What is the duration of MSc Data Science
+    - Duration of MSc Data Science 
+    
+- intent: duration_tm
+  examples: |
+    - What is the duration of MTech Technology Management 
+    - Duration of MTech Technology Management   
+    
+- intent: duration_mphil     
+  examples: | 
+    - What is the duration of M.Phil Futures Studies
+    - Duration of M.Phil Futures Studies
+    
+- intent: duration_diploma
+  examples: |
+    - What is the duration of PGDKM 
+    - What is the duration of P.G.Diploma in Knowledge Management
+    - Duration of PGDKM
+    - Duration of P.G.Diploma in Knowledge Management   
+     
+- intent: NAAC
+  examples: |
+   - What is the NAAC accrediction grade
+   
+- intent: year
+  examples: |
+   - In which year was the department being established 
+   
+- intent: objective
+  examples: |
+   - What is the objective of the department?
+   - What is the objective of the department
+   
+- intent: faculty
+  examples: |
+   - Faculty details of the department
+   
+- intent: elig_ds
+  examples: |
+   - What is the eligibility for MSc Data Science
+   - Eligibility for MSc Data Science
+              
+- intent: elig_tm
+  examples: |
+   - What is the eligibility for MTech Technology Management 
+   - Eligibility for MTech Technology Management 
+   
+- intent: elig_mphil
+  examples: |
+   - What is the eligibility for M.Phil Futures Studies
+   - Eligibility for M.Phil Futures Studies
+   
+- intent: elig_diploma
+  examples: |
+   - What is the eligibility for P.G.Diploma in Knowledge Management
+   - Eligibility for P.G.Diploma in Knowledge Management
+   - What is the eligibility for PGDKM
+   - Eligibility for PGDKM
+   
+- intent: elig_phd
+  examples: |
+   - What is the eligibility for Ph.D in Futures Studies
+   - Eligibility for Ph.D in Futures Studies
+   - What is the eligibility for Ph.D
+   - Eligibility for Ph.D
+   
+- intent: library
+  examples: |
+   - Is there a library for the department?
+   - Is there a library for the department
+   - Library facility    
+   
+- intent: lab
+  examples: |
+   - Is there a lab for the department?
+   - Is there a lab for the department
+   - Lab facility
+   
+- intent: contact_details
+  examples: |
+   - How can I contact the department?
+   - Contact details of the department
+   - Contact details        
+   
+- intent: tm_admit
+  examples: |
+   - Admission process for MTech Technology Management  
+   - Mode of selection for MTech Technology Management  
+   - How to apply for MTech Technology Management 
+   
+- intent: diploma_admit
+  examples: |
+   - Admission process for P.G.Diploma in Knowledge Management
+   - Admission process for PGDKM
+   - How to apply for PGDKM
+   - How to apply for P.G.Diploma in Knowledge Management
+   
+- intent: mphil_admit
+  examples: |
+   - Admission process for M.Phil Futures Studies
+   - How to apply for M.Phil Futures Studies
+   
+- intent: phd_admit
+  examples: |
+   - Admission process for Ph.D in Futures Studies 
+   - How to apply for Ph.D in Futures Studies
+      
+- intent: ds_admit
+  examples: |
+   - Admission process for MSc Data Science
+   - How to apply for MSc Data Science                
