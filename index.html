@@ -44,8 +44,11 @@
     <div id="chat-container"></div>
     <script src="./chatbot-ui.js"></script>
     <script>
+        
         createChatBot(host = 'http://localhost:5002/api', botLogo = "./imgs/bot-logo.png",
-            title = "JEFF", welcomeMessage = "Hey, i am Jeff, I can assist you with the queries regarding the admission process of PG CSS Departments.")
+            title = "JEFF", welcomeMessage = "Hey, i am Jeff, I can assist you with the queries regarding the admission process of PG CSS Departments.",
+                      socketUrl: "https://822d-2401-4900-3327-aaa9-3860-8a67-14c3-778e.in.ngrok.io",
+                     socketPath: "/socket.io/")
     </script>
 
 
