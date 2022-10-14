@@ -1,321 +1,211 @@
-/*
-Makes backend API call to rasa chatbot and display output to chatbot frontend
-*/
+import * as THREE from "https://cdn.skypack.dev/three@0.136.0";
+import { OrbitControls } from "https://cdn.skypack.dev/three@0.136.0/examples/jsm/controls/OrbitControls.js";
+import { OBJLoader } from "https://cdn.skypack.dev/three@0.136.0/examples/jsm/loaders/OBJLoader.js";
+import { Noise } from "https://cdn.skypack.dev/noisejs@2.1.0";
 
-function init() {
+console.clear();
 
-    //---------------------------- Including Jquery ------------------------------
+let maxSpeed = 0.2;
+let maxForce = 0.1;
+const perceptionRadius = 8;
+let sceneRadius = 100;
 
-    var script = document.createElement('script');
-    script.src = 'https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js';
-    script.type = 'text/javascript';
-    document.getElementsByTagName('head')[0].appendChild(script);
+const noiseX = new Noise(Math.random());
+const noiseY = new Noise(Math.random());
+const noiseZ = new Noise(Math.random());
 
-    //--------------------------- Important Variables----------------------------
-    botLogoPath = "./imgs/bot-logo.png"
+/* SETUP */
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(
+  75,
+  window.innerWidth / window.innerHeight,
+  0.1,
+  1000
+);
+camera.position.z = 50;
 
-    //--------------------------- Chatbot Frontend -------------------------------
-    const chatContainer = document.getElementById("chat-container");
+const renderer = new THREE.WebGLRenderer({
+  antialias: true,
+  alpha: true
+});
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.setSize(window.innerWidth, window.innerHeight);
+document.body.appendChild(renderer.domElement);
 
-    template = ` <button class='chat-btn'><img src = "./icons/comment.png" class = "icon" ></button>
+/* CONTROLS */
+const controls = new OrbitControls(camera, renderer.domElement);
 
-    <div class='chat-popup'>
+const ambientLight = new THREE.AmbientLight(0x000000);
+scene.add(ambientLight);
+
+const light1 = new THREE.PointLight(0xffffff, 1, 0);
+light1.position.set(0, 200, 0);
+scene.add(light1);
+
+const light2 = new THREE.PointLight(0xffffff, 1, 0);
+light2.position.set(100, 200, 100);
+scene.add(light2);
+
+const light3 = new THREE.PointLight(0xffffff, 1, 0);
+light3.position.set(- 100, -200, -100);
+scene.add(light3);
+/* BASIC BOX */
+
+class Bat {
+  constructor(mesh) {
+    this.randFactor = Math.random() * 2;
+    let scale = Math.random() * 0.5 + 0.3;
+    this.scale = new THREE.Vector3(scale, scale, scale);
+    this.position = new THREE.Vector3().random().subScalar(0.5).multiplyScalar(80);
+    this.velocity = new THREE.Vector3().random().subScalar(0.5);
+    this.velocity.setLength(Math.random() * 2 + 2);
+    this.acceleration = new THREE.Vector3();
+  }
+  
+  align() {
     
-		<div class='chat-header'>
-			<div class='chatbot-img'>
-				<img src='${botLogoPath}' alt='Chat Bot image' class='bot-img'> 
-			</div>
-			<h3 class='bot-title'>Covid Bot</h3>
-			<button class = "expand-chat-window" ><img src="./icons/open_fullscreen.png" class="icon" ></button>
-		</div>
+    return alignment;
+  }
+  
+  separation() {
+    
+    return separation;
+  }
+  
+  cohesion() {
+    
+    return cohesion;
+  }
 
-		<div class='chat-area'>
-            <div class='bot-msg'>
-                <img class='bot-img' src ='${botLogoPath}' />
-				<span class='msg'>Hi, How can i help you?</span>
-			</div>
-
-            <!-- <div class='bot-msg'>
-                <img class='bot-img' src ='${botLogoPath}' />
-                <div class='response-btns'>
-                    <button class='btn-primary' onclick= 'userResponseBtn(this)' value='/sign_in'>sample btn</button>            
-                </div>
-			</div> -->
-
-			<!-- <div class='bot-msg'>
-				<img class='msg-image' src = "https://i.imgur.com/nGF1K8f.jpg" />
-			</div> -->
-
-			<!-- <div class='user-msg'>
-				<span class='msg'>Hi, How can i help you?</span>
-			</div> -->
-			
-
-		</div>
-
-
-		<div class='chat-input-area'>
-			<input type='text' autofocus class='chat-input' onkeypress='return givenUserInput(event)' placeholder='Type a message ...' autocomplete='off'>
-			<button class='chat-submit'><i class='material-icons'>send</i></button>
-		</div>
-
-	</div>`
-
-
-    chatContainer.innerHTML = template;
-
-    //--------------------------- Important Variables----------------------------
-    var inactiveMessage = "Server is down, Please contact the developer to activate it"
-
-
-    chatPopup = document.querySelector(".chat-popup")
-    chatBtn = document.querySelector(".chat-btn")
-    chatSubmit = document.querySelector(".chat-submit")
-    chatHeader = document.querySelector(".chat-header")
-    chatArea = document.querySelector(".chat-area")
-    chatInput = document.querySelector(".chat-input")
-    expandWindow = document.querySelector(".expand-chat-window")
-    root = document.documentElement;
-    chatPopup.style.display = "none"
-    var host = ""
-
-
-    //------------------------ ChatBot Toggler -------------------------
-
-    chatBtn.addEventListener("click", () => {
-
-        mobileDevice = !detectMob()
-        if (chatPopup.style.display == "none" && mobileDevice) {
-            chatPopup.style.display = "flex"
-            chatInput.focus();
-            chatBtn.innerHTML = `<img src = "./icons/close.png" class = "icon" >`
-        } else if (mobileDevice) {
-            chatPopup.style.display = "none"
-            chatBtn.innerHTML = `<img src = "./icons/comment.png" class = "icon" >`
-        } else {
-            mobileView()
-        }
-    })
-
-    chatSubmit.addEventListener("click", () => {
-        let userResponse = chatInput.value.trim();
-        if (userResponse !== "") {
-            setUserResponse();
-            send(userResponse)
-        }
-    })
-
-    expandWindow.addEventListener("click", (e) => {
-        // console.log(expandWindow.innerHTML)
-        if (expandWindow.innerHTML == '<img src="./icons/open_fullscreen.png" class="icon">') {
-            expandWindow.innerHTML = `<img src = "./icons/close_fullscreen.png" class = 'icon'>`
-            root.style.setProperty('--chat-window-height', 80 + "%");
-            root.style.setProperty('--chat-window-total-width', 85 + "%");
-        } else if (expandWindow.innerHTML == '<img src="./icons/close.png" class="icon">') {
-            chatPopup.style.display = "none"
-            chatBtn.style.display = "block"
-        } else {
-            expandWindow.innerHTML = `<img src = "./icons/open_fullscreen.png" class = "icon" >`
-            root.style.setProperty('--chat-window-height', 500 + "px");
-            root.style.setProperty('--chat-window-total-width', 380 + "px");
-        }
-
-    })
-}
-
-// end of init function
-
-
-
-var passwordInput = false;
-
-function userResponseBtn(e) {
-    send(e.value);
-}
-
-// to submit user input when he presses enter
-function givenUserInput(e) {
-    if (e.keyCode == 13) {
-        let userResponse = chatInput.value.trim();
-        if (userResponse !== "") {
-            setUserResponse()
-            send(userResponse)
-        }
+  
+  walls () {
+    if (this.position.x < -sceneRadius) {
+      this.position.x = sceneRadius;
+    } else if (this.position.x > sceneRadius) {
+      this.position.x = -sceneRadius;
+    } else if (this.position.y < -sceneRadius) {
+      this.position.y = sceneRadius;
+    } else if (this.position.y > sceneRadius) {
+      this.position.y = -sceneRadius;
+    } else if (this.position.z < -sceneRadius) {
+      this.position.z = sceneRadius;
+    } else if (this.position.z > sceneRadius) {
+      this.position.z = -sceneRadius;
     }
-}
-
-// to display user message on UI
-function setUserResponse() {
-    let userInput = chatInput.value;
-    if (passwordInput) {
-        userInput = "******"
-    }
-    if (userInput) {
-        let temp = `<div class="user-msg"><span class = "msg">${userInput}</span></div>`
-        chatArea.innerHTML += temp;
-        chatInput.value = ""
-    } else {
-        chatInput.disabled = false;
-    }
-    scrollToBottomOfResults();
-}
-
-
-
-function scrollToBottomOfResults() {
-    chatArea.scrollTop = chatArea.scrollHeight;
-}
-
-/***************************************************************
-Frontend Part Completed
-****************************************************************/
-
-// host = 'http://localhost:5005/webhooks/rest/webhook'
-function send(message) {
-    chatInput.type = "text"
-    passwordInput = false;
-    chatInput.focus();
-    console.log("User Message:", message)
-    $.ajax({
-        url: host,
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({
-            "message": message,
-            "sender": "User"
-        }),
-        success: function(data, textStatus) {
-            if (data != null) {
-                setBotResponse(data);
-            }
-            console.log("Rasa Response: ", data, "\n Status:", textStatus)
-        },
-        error: function(errorMessage) {
-            setBotResponse("");
-            console.log('Error' + errorMessage);
-
-        }
+  }
+  
+  flock () {
+    let alignment = new THREE.Vector3();
+    let cohesion = new THREE.Vector3();
+    let separation = new THREE.Vector3();
+    let total = 0;
+    bats.forEach(bat => {
+      let d = this.position.distanceTo(bat.position);
+      if (bat !== this && d < perceptionRadius) {
+        alignment.add(bat.velocity);
+        cohesion.add(bat.position);
+        let diff = this.position.clone().sub(bat.position);
+        diff.divideScalar(d * d);
+        separation.add(diff);
+        total++;
+      }
     });
-    chatInput.focus();
-}
+    if (total > 0) {
+      alignment.divideScalar(total);
+      alignment.setLength(maxSpeed);
+      alignment.sub(this.velocity);
+      alignment.clampLength(0, maxForce);
 
-
-//------------------------------------ Set bot response -------------------------------------
-function setBotResponse(val) {
-    setTimeout(function() {
-        if (val.length < 1) {
-            //if there is no response from Rasa
-            // msg = 'I couldn\'t get that. Let\' try something else!';
-            msg = inactiveMessage;
-
-            var BotResponse = `<div class='bot-msg'><img class='bot-img' src ='${botLogoPath}' /><span class='msg'> ${msg} </span></div>`;
-            $(BotResponse).appendTo('.chat-area').hide().fadeIn(1000);
-            scrollToBottomOfResults();
-            chatInput.focus();
-
-        } else {
-            //if we get response from Rasa
-            for (i = 0; i < val.length; i++) {
-                //check if there is text message
-                if (val[i].hasOwnProperty("text")) {
-                    const botMsg = val[i].text;
-                    if (botMsg.includes("password")) {
-                        chatInput.type = "password";
-                        passwordInput = true;
-                    }
-                    var BotResponse = `<div class='bot-msg'><img class='bot-img' src ='${botLogoPath}' /><span class='msg'>${val[i].text}</span></div>`;
-                    $(BotResponse).appendTo('.chat-area').hide().fadeIn(1000);
-                }
-
-                //check if there is image
-                if (val[i].hasOwnProperty("image")) {
-                    var BotResponse = "<div class='bot-msg'>" + "<img class='bot-img' src ='${botLogoPath}' />"
-                    '<img class="msg-image" src="' + val[i].image + '">' +
-                        '</div>'
-                    $(BotResponse).appendTo('.chat-area').hide().fadeIn(1000);
-                }
-
-                //check if there are buttons
-                if (val[i].hasOwnProperty("buttons")) {
-                    var BotResponse = `<div class='bot-msg'><img class='bot-img' src ='${botLogoPath}' /><div class='response-btns'>`
-
-                    buttonsArray = val[i].buttons;
-                    buttonsArray.forEach(btn => {
-                        BotResponse += `<button class='btn-primary' onclick= 'userResponseBtn(this)' value='${btn.payload}'>${btn.title}</button>`
-                    })
-
-                    BotResponse += "</div></div>"
-
-                    $(BotResponse).appendTo('.chat-area').hide().fadeIn(1000);
-                    chatInput.disabled = true;
-                }
-
-            }
-            scrollToBottomOfResults();
-            chatInput.disabled = false;
-            chatInput.focus();
-        }
-
-    }, 500);
-}
-
-
-
-
-function mobileView() {
-    $('.chat-popup').width($(window).width());
-
-    if (chatPopup.style.display == "none") {
-        chatPopup.style.display = "flex"
-            // chatInput.focus();
-        chatBtn.style.display = "none"
-        chatPopup.style.bottom = "0"
-        chatPopup.style.right = "0"
-            // chatPopup.style.transition = "none"
-        expandWindow.innerHTML = `<img src = "./icons/close.png" class = "icon" >`
-    }
-}
-
-function detectMob() {
-    return ((window.innerHeight <= 800) && (window.innerWidth <= 600));
-}
-
-function chatbotTheme(theme) {
-    const gradientHeader = document.querySelector(".chat-header");
-    const orange = {
-        color: "#FBAB7E",
-        background: "linear-gradient(19deg, #FBAB7E 0%, #F7CE68 100%)"
+      cohesion.divideScalar(total);
+      cohesion.sub(this.position);
+      cohesion.setLength(maxSpeed);
+      cohesion.sub(this.velocity);
+      cohesion.clampLength(0, maxForce);
+      
+      separation.divideScalar(total);
+      separation.setLength(maxSpeed);
+      separation.sub(this.velocity);
+      separation.clampLength(0, maxForce);
     }
 
-    const purple = {
-        color: "#B721FF",
-        background: "linear-gradient(19deg, #21D4FD 0%, #B721FF 100%)"
-    }
+    alignment.multiplyScalar(0.1);
+    cohesion.multiplyScalar(0.15);
+    separation.multiplyScalar(0.15);
 
-
-
-    if (theme === "orange") {
-        root.style.setProperty('--chat-window-color-theme', orange.color);
-        gradientHeader.style.backgroundImage = orange.background;
-        chatSubmit.style.backgroundColor = orange.color;
-    } else if (theme === "purple") {
-        root.style.setProperty('--chat-window-color-theme', purple.color);
-        gradientHeader.style.backgroundImage = purple.background;
-        chatSubmit.style.backgroundColor = purple.color;
-    }
+    this.acceleration.add(alignment);
+    this.acceleration.add(cohesion);
+    this.acceleration.add(separation);
+  }
+  
+  update() {
+    this.walls();
+    this.flock();
+    this.acceleration.x += noiseX.simplex3(this.randFactor + this.position.x*0.1,this.position.y*0.1,this.position.z*0.1) * 0.1;
+    this.acceleration.y += noiseY.simplex3(this.randFactor + this.position.x*0.1,this.position.y*0.1,this.position.z*0.1) * 0.1;
+    this.acceleration.z += noiseZ.simplex3(this.randFactor + this.position.x*0.1,this.position.y*0.1,this.position.z*0.1) * 0.1;
+    this.position.add(this.velocity);
+    this.velocity.add(this.acceleration);
+    this.velocity.clampLength(0, maxSpeed * 0.2);
+    this.acceleration.multiplyScalar(0);
+  }
 }
 
-function createChatBot(hostURL, botLogo, title, welcomeMessage, inactiveMsg, theme = "blue") {
+/* BAT */
+const loader = new OBJLoader();
+loader.load("https://assets.codepen.io/127738/Bat.obj", (model) => {
+  onLoad(model.children[0]);
+  requestAnimationFrame(render);
+});
 
-    host = hostURL;
-    botLogoPath = botLogo;
-    inactiveMessage = inactiveMsg;
-    init()
-    const msg = document.querySelector(".msg");
-    msg.innerText = welcomeMessage;
-
-    const botTitle = document.querySelector(".bot-title");
-    botTitle.innerText = title;
-
-    chatbotTheme(theme)
+const count = 1000;
+const bats = [];
+let bodiesMesh = null;
+const dummy = new THREE.Object3D();
+for (let i = 0; i < count; i++) {
+  bats.push(new Bat());
 }
+
+function onLoad(children) {
+  // BODIES
+  const material = new THREE.MeshPhongMaterial({
+    color: 0x000000,
+    specular: 0x262626
+  });
+  bodiesMesh = new THREE.InstancedMesh(children.geometry, material, count);
+  bodiesMesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+  scene.add(bodiesMesh);
+}
+
+/* RENDERING */
+function render(a) {
+  requestAnimationFrame(render);
+  
+  bats.forEach((bat, i) => {
+    bat.update();
+  });
+  bats.forEach((bat, i) => {
+    dummy.position.copy(bat.position);
+    dummy.scale.copy(bat.scale);
+    var aimP = new THREE.Vector3();
+    aimP.copy(bat.position).add(bat.velocity);
+    dummy.lookAt(aimP);
+    dummy.updateMatrix();
+    bodiesMesh.setMatrixAt(i, dummy.matrix);
+  });
+  bodiesMesh.instanceMatrix.needsUpdate = true;
+  
+  noiseX.seed(a * 0.00000001);
+  noiseY.seed(a * 0.00000001 + 30);
+  noiseZ.seed(a * 0.00000001 + 60);
+
+  renderer.render(scene, camera);
+}
+
+/* EVENTS */
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+window.addEventListener("resize", onWindowResize, false);
+
